@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Quotes from "./Quotes";
+import AddQuotes from "./AddQuotes";
 
 class QuoteSearcher extends Component {
   state = {
@@ -19,15 +20,18 @@ class QuoteSearcher extends Component {
           return { ...quote, likedness: 0 };
         })
       )
-      .then(dataWithLikes => this.updateQuotes(dataWithLikes))
+      .then(dataWithLikes => {
+        this.updateQuotes(dataWithLikes);
+      })
       .catch(console.error);
   }
 
   updateQuotes = results => {
     this.setState({
       ...this.state,
-      quotes: results,
-      fetching: true
+      quotes: this.state.quotes.concat(results),
+      fetching: false,
+      searching: true
     });
   };
 
@@ -50,7 +54,7 @@ class QuoteSearcher extends Component {
   handleSubmit(event) {
     event.preventDefault();
     this.search(this.state.searchTerm);
-    this.setState({ ...this.state, searching: true });
+    this.setState({ ...this.state, fetching: true });
   }
 
   buildDuplicatesFilter() {
@@ -61,6 +65,20 @@ class QuoteSearcher extends Component {
         return true;
       }
     };
+  }
+
+  addQuote(text, name) {
+    const newQuote = {
+      _id: Math.round(Math.random() * 100000),
+      quoteAuthor: name,
+      quoteText: text,
+      likedness: 0
+    };
+    this.setState({
+      ...this.state,
+      quotes: this.state.quotes.concat(newQuote)
+    });
+    console.log(this.state);
   }
 
   render() {
@@ -86,12 +104,14 @@ class QuoteSearcher extends Component {
             return quote.likedness === -1 ? totalDislikes + 1 : totalDislikes;
           }, 0)}
         </p>
+        <AddQuotes addQuote={this.addQuote.bind(this)} />
         <div>
-          {!this.state.fetching && this.state.searching ? "Loading..." : ""}
-          {this.state.fetching && this.state.quotes.length === 0
+          {this.state.fetching && "Loading..."}
+          {this.state.searching && this.state.quotes.length === 0
             ? "Nothing found"
             : ""}
-          {this.state.fetching &&
+          {!this.state.fetching &&
+            this.state.quotes.length >= 1 &&
             this.state.quotes
               .filter(this.buildDuplicatesFilter())
               .map(quote => {
