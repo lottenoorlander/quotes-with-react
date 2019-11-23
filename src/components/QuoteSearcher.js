@@ -3,11 +3,16 @@ import Quotes from "./Quotes";
 
 class QuoteSearcher extends Component {
   state = {
-    quotes: []
+    quotes: [],
+    searchTerm: ""
   };
 
-  componentDidMount() {
-    fetch("https://quote-garden.herokuapp.com/quotes/search/tree")
+  search(searchTerm) {
+    fetch(
+      `https://quote-garden.herokuapp.com/quotes/search/${encodeURIComponent(
+        searchTerm
+      )}`
+    )
       .then(res => res.json())
       .then(data =>
         data.results.map(quote => {
@@ -21,7 +26,7 @@ class QuoteSearcher extends Component {
   updateQuotes = results => {
     this.setState({
       ...this.state,
-      quotes: this.state.quotes.concat(results),
+      quotes: results,
       fetching: true
     });
   };
@@ -37,10 +42,30 @@ class QuoteSearcher extends Component {
     );
   };
 
+  handleChange = event => {
+    console.log(event.target.value);
+    this.setState({ ...this.state, searchTerm: event.target.value });
+  };
+
+  handleSubmit(event) {
+    event.preventDefault();
+    this.search(this.state.searchTerm);
+    this.setState({ ...this.state, searching: true });
+  }
+
   render() {
     return (
       <div>
         <h1>Quotes</h1>
+        <form onSubmit={this.handleSubmit.bind(this)}>
+          <input
+            type="text"
+            name="search"
+            onChange={this.handleChange.bind(this)}
+            value={this.state.search}
+          />
+          <input type="submit" value="Search!" />
+        </form>
         <p style={{ fontWeight: "bold" }}>
           Liked:
           {this.state.quotes.reduce((totalLikes, quote) => {
@@ -52,7 +77,7 @@ class QuoteSearcher extends Component {
           }, 0)}
         </p>
         <div>
-          {!this.state.fetching && "Loading..."}
+          {!this.state.fetching && this.state.searching ? "Loading..." : ""}
           {this.state.fetching &&
             this.state.quotes.map(quote => {
               return (
