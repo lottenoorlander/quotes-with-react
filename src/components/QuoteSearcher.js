@@ -78,6 +78,9 @@ class QuoteSearcher extends Component {
         </p>
         <div>
           {!this.state.fetching && this.state.searching ? "Loading..." : ""}
+          {this.state.fetching && this.state.quotes.length === 0
+            ? "Nothing found"
+            : ""}
           {this.state.fetching &&
             this.state.quotes.map(quote => {
               return (
