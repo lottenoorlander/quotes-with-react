@@ -53,6 +53,16 @@ class QuoteSearcher extends Component {
     this.setState({ ...this.state, searching: true });
   }
 
+  buildDuplicatesFilter() {
+    const duplicates = {};
+    return function(quote) {
+      if (!duplicates[quote.quoteText]) {
+        duplicates[quote.quoteText] = 1;
+        return true;
+      }
+    };
+  }
+
   render() {
     return (
       <div>
@@ -82,18 +92,20 @@ class QuoteSearcher extends Component {
             ? "Nothing found"
             : ""}
           {this.state.fetching &&
-            this.state.quotes.map(quote => {
-              return (
-                <Quotes
-                  key={quote._id}
-                  id={quote._id}
-                  text={quote.quoteText}
-                  author={quote.quoteAuthor}
-                  likedness={quote.likedness}
-                  setLiked={this.setLiked}
-                />
-              );
-            })}
+            this.state.quotes
+              .filter(this.buildDuplicatesFilter())
+              .map(quote => {
+                return (
+                  <Quotes
+                    key={quote._id}
+                    id={quote._id}
+                    text={quote.quoteText}
+                    author={quote.quoteAuthor}
+                    likedness={quote.likedness}
+                    setLiked={this.setLiked}
+                  />
+                );
+              })}
         </div>
       </div>
     );
