@@ -104,6 +104,18 @@ class QuoteSearcher extends Component {
             return quote.likedness === -1 ? totalDislikes + 1 : totalDislikes;
           }, 0)}
         </p>
+        <p>
+          Different authors:{" "}
+          {
+            Object.keys(
+              this.state.quotes.reduce((authors, quote) => {
+                authors[quote.quoteAuthor] = 1;
+                return authors;
+              }, {})
+            ).length
+          }
+          Unique quotes: {this.state.quotes.length}{" "}
+        </p>
         <AddQuotes addQuote={this.addQuote.bind(this)} />
         <div>
           {this.state.fetching && "Loading..."}
